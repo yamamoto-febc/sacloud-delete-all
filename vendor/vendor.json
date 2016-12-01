@@ -1,0 +1,73 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "dvabztWVQX8f6oMLRyv4dLH+TGY=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "346938d642f2ec3594ed81d874461961cd0faa76",
+			"revisionTime": "2016-10-29T20:57:26Z"
+		},
+		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
+			"checksumSHA1": "AIhWqbjvTTFHGnV/k4mQID2HsOo=",
+			"path": "github.com/sacloud/libsacloud",
+			"revision": "71dd2691437722f9c0196bed2b5dc4fc55f8e6d5",
+			"revisionTime": "2016-12-01T10:19:58Z"
+		},
+		{
+			"checksumSHA1": "dLIqulSzIANT/eqGwN0t/dQxIyU=",
+			"path": "github.com/sacloud/libsacloud/api",
+			"revision": "71dd2691437722f9c0196bed2b5dc4fc55f8e6d5",
+			"revisionTime": "2016-12-01T10:19:58Z"
+		},
+		{
+			"checksumSHA1": "/pM8ChuoIhy2QQifuqwvo3G6/y4=",
+			"path": "github.com/sacloud/libsacloud/sacloud",
+			"revision": "71dd2691437722f9c0196bed2b5dc4fc55f8e6d5",
+			"revisionTime": "2016-12-01T10:19:58Z"
+		},
+		{
+			"checksumSHA1": "qTiesxgZ+Fm5yiof2bGEepcWMcc=",
+			"path": "github.com/sacloud/libsacloud/sacloud/ostype",
+			"revision": "71dd2691437722f9c0196bed2b5dc4fc55f8e6d5",
+			"revisionTime": "2016-12-01T10:19:58Z"
+		},
+		{
+			"checksumSHA1": "8UYRXj3K85LtF1UJiUKT1gP345E=",
+			"path": "github.com/sacloud/sackerel/version",
+			"revision": "4dd883ffa0c97282035acd4e13e537ef935d6dcf",
+			"revisionTime": "2016-10-19T04:53:44Z"
+		},
+		{
+			"checksumSHA1": "hIEmcd7hIDqO/xWSp1rJJHd0TpE=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "18a02ba4a312f95da08ff4cfc0055750ce50ae9e",
+			"revisionTime": "2016-11-17T07:43:51Z"
+		},
+		{
+			"checksumSHA1": "Hz2pYMOnXU2yfxs6vk14f7wHbO0=",
+			"path": "github.com/yamamoto-febc/jobq",
+			"revision": "e84914ddcb6230dc1ce6a825ef787c87563746b6",
+			"revisionTime": "2016-12-01T05:00:38Z"
+		},
+		{
+			"checksumSHA1": "F+MCVgKlS40Kz9iH74udsJ+dDN4=",
+			"path": "github.com/yamamoto-febc/jobq/routing",
+			"revision": "e84914ddcb6230dc1ce6a825ef787c87563746b6",
+			"revisionTime": "2016-12-01T05:00:38Z"
+		},
+		{
+			"checksumSHA1": "exMnsyei9H9PgttMUskof6S2554=",
+			"path": "gopkg.in/urfave/cli.v2",
+			"revision": "e485446237011b8abac93919242e6f059ad56c87",
+			"revisionTime": "2016-10-29T22:39:47Z"
+		}
+	],
+	"rootPath": "github.com/yamamoto-febc/sacloud-delete-all"
+}
