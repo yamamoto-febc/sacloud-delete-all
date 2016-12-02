@@ -22,6 +22,7 @@ var routes map[string]jobq.JobRouterFunc = map[string]jobq.JobRouterFunc{
 		"license",
 		"sshkey",
 		"note",
+		"icon",
 	),
 	"serialize-delete": routing.PathThrough("loadbalancer"),
 
@@ -37,10 +38,12 @@ var routes map[string]jobq.JobRouterFunc = map[string]jobq.JobRouterFunc{
 	"server":      routing.Action("sacloud", FindAndDeleteJob("server")),
 	"server:done": routing.PathThrough("after-server"),
 
-	"after-server": routing.Parallel("switch", "disk"),
+	"after-server": routing.Parallel("internet", "disk"),
 
-	"switch":      routing.Action("sacloud", FindAndDeleteJob("switch")),
-	"switch:done": routing.PathThrough("bridge"),
+	"internet":      routing.Action("sacloud", FindAndDeleteJob("internet")),
+	"internet:done": routing.PathThrough("switch"),
+	"switch":        routing.Action("sacloud", FindAndDeleteJob("switch")),
+	"switch:done":   routing.PathThrough("bridge"),
 
 	"archive":            routing.Action("sacloud", FindAndDeleteJob("archive")),
 	"archive:done":       routing.Goal,
@@ -66,6 +69,8 @@ var routes map[string]jobq.JobRouterFunc = map[string]jobq.JobRouterFunc{
 	"sshkey:done":        routing.Goal,
 	"note":               routing.Action("sacloud", FindAndDeleteJob("note")),
 	"note:done":          routing.Goal,
+	"icon":               routing.Action("sacloud", FindAndDeleteJob("icon")),
+	"icon:done":          routing.Goal,
 
 	"wait-for-delete": func(queue *jobq.Queue, option *jobq.Option, req jobq.JobRequestAPI) {
 		wg.Wait()

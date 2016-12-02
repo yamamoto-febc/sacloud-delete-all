@@ -12,6 +12,7 @@ type Option struct {
 	AccessTokenSecret string
 	Zones             []string
 	TraceMode         bool
+	ForceMode         bool
 	JobQueueOption    *jobq.Option
 }
 
