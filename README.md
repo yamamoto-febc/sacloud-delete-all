@@ -20,6 +20,11 @@ Do you really want to destroy all?[Y/n]
 
 ```
 
+ゾーンを指定して削除する例(石狩第1ゾーンと第2ゾーンを指定)
+```bash
+$ ./sacloud-delete-all --token=[さくらのクラウドAPIトークン] --secret=[さくらのクラウドAPIシークレット] --zones is1a --zones is1b
+```
+
 指定できるオプションの詳細は`--help`で表示できます。
 
 ```bash
