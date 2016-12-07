@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/sacloud/libsacloud/api"
 	"github.com/sacloud/libsacloud/sacloud"
-	"github.com/sacloud/sackerel/version"
 	"github.com/yamamoto-febc/jobq"
+	"github.com/yamamoto-febc/sacloud-delete-all/version"
 	"time"
 )
 
