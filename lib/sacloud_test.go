@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"github.com/stretchr/testify/assert"
+	//"github.com/stretchr/testify/assert"
 	"log"
 	"os"
 	"testing"
@@ -41,14 +41,14 @@ func TestMain(m *testing.M) {
 	os.Exit(ret)
 }
 
-func Test_getSacloudAPIWrapper(t *testing.T) {
-
-	client := getClient(mockOption, "tk1a")
-
-	wrapper := getSacloudAPIWrapper(client, "server")
-
-	assert.NotNil(t, wrapper.findFunc)
-	res, err := wrapper.findFunc()
-	assert.NoError(t, err)
-	assert.True(t, len(res) > 0)
-}
+//func Test_getSacloudAPIWrapper(t *testing.T) {
+//
+//	client := getClient(mockOption, "tk1a")
+//
+//	wrapper := getSacloudAPIWrapper(client, "server")
+//
+//	assert.NotNil(t, wrapper.findFunc)
+//	res, err := wrapper.findFunc()
+//	assert.NoError(t, err)
+//	assert.True(t, len(res) > 0)
+//}
