@@ -6,8 +6,15 @@ import (
 	"github.com/sacloud/libsacloud/sacloud"
 	"github.com/yamamoto-febc/jobq"
 	"github.com/yamamoto-febc/sacloud-delete-all/version"
+	"strings"
+	"sync"
 	"time"
 )
+
+type ParallelJobPayload struct {
+	RouteName string
+	Targets   []string
+}
 
 func doActionPerZone(option *Option, sacloudAPIFunc func(*api.Client) error) error {
 	for _, zone := range option.Zones {
@@ -29,48 +36,98 @@ func FindAndDeleteJob(target string) func(interface{}) jobq.JobAPI {
 	}
 }
 
+func FindAndDeleteJobParallel(routeName string, targets ...string) func(interface{}) jobq.JobAPI {
+
+	payload := ParallelJobPayload{
+		RouteName: routeName,
+		Targets:   targets,
+	}
+	targetName := strings.Join(targets, ",")
+
+	return func(p interface{}) jobq.JobAPI {
+		return jobq.NewJob(fmt.Sprintf("FindAndDeleteParallel:%s", targetName), findAndDeleteParallel, payload)
+	}
+}
+
+func findAndDeleteParallel(queue *jobq.Queue, option *jobq.Option, job jobq.JobAPI) {
+	targets := job.GetPayload().(ParallelJobPayload)
+	var wg sync.WaitGroup
+	wg.Add(len(targets.Targets))
+	for _, target := range targets.Targets {
+		go func(t string) {
+			err := doFindAndDelete(queue, option, t)
+			if err != nil {
+				queue.StopByError(err)
+			} else {
+				queue.PushRequest(fmt.Sprintf("%s:done", target), nil)
+				resourceWaitGroup.Done()
+				wg.Done()
+			}
+		}(target)
+	}
+	wg.Wait()
+	queue.PushRequest(fmt.Sprintf("%s:done", targets.RouteName), nil)
+}
+
 func findAndDelete(queue *jobq.Queue, option *jobq.Option, job jobq.JobAPI) {
 	target := job.GetPayload().(string)
-	err := doActionPerZone(currentOption, func(client *api.Client) error {
+	err := doFindAndDelete(queue, option, target)
+	if err != nil {
+		queue.StopByError(err)
+	} else {
+		queue.PushRequest(fmt.Sprintf("%s:done", target), nil)
+		resourceWaitGroup.Done()
+	}
+}
+
+func doFindAndDelete(queue *jobq.Queue, option *jobq.Option, target string) error {
+	return doActionPerZone(currentOption, func(client *api.Client) error {
 		apiWrapper := getSacloudAPIWrapper(client, target)
 		resources, err := apiWrapper.findFunc()
 		if err != nil {
 			return fmt.Errorf("target[%s](%s) : %s", target, client.Zone, err)
 		}
-		for _, r := range resources {
-			id := r.id
-			name := r.name
-			if apiWrapper.isAvaiableFunc != nil {
-				isPowerOn, err := apiWrapper.isAvaiableFunc(id)
+
+		var wg sync.WaitGroup
+		wg.Add(len(resources))
+
+		for _, resource := range resources {
+
+			go func(r sacloudResourceWrapper) {
+				id := r.id
+				name := r.name
+				if apiWrapper.isAvaiableFunc != nil {
+					isPowerOn, err := apiWrapper.isAvaiableFunc(id)
+					if err != nil {
+						queue.StopByError(fmt.Errorf("%-26s : resource(id:%d,name:%s) : %s", fmt.Sprintf("target[%s/%s]", target, client.Zone), id, name, err))
+						return
+					}
+					if isPowerOn {
+						_, err := apiWrapper.powerOffFunc(id)
+						if err != nil {
+							queue.StopByError(fmt.Errorf("%-26s : resource(id:%d,name:%s) : %s", fmt.Sprintf("target[%s/%s]", target, client.Zone), id, name, err))
+							return
+						}
+						err = apiWrapper.waitForPoweroffFunc(id, client.DefaultTimeoutDuration)
+						if err != nil {
+							queue.StopByError(fmt.Errorf("%-26s : resource(id:%d,name:%s) : %s", fmt.Sprintf("target[%s/%s]", target, client.Zone), id, name, err))
+							return
+						}
+					}
+				}
+				err := apiWrapper.deleteFunc(id)
 				if err != nil {
-					return fmt.Errorf("target[%s/%s] : resource(id:%d,name:%s) : %s", target, client.Zone, id, name, err)
+					queue.StopByError(fmt.Errorf("%-26s : resource(id:%d,name:%s) : %s", fmt.Sprintf("target[%s/%s]", target, client.Zone), id, name, err))
+					return
 				}
-				if isPowerOn {
-					_, err := apiWrapper.powerOffFunc(id)
-					if err != nil {
-						return fmt.Errorf("target[%s/%s] : resource(id:%d,name:%s) : %s", target, client.Zone, id, name, err)
-					}
-					err = apiWrapper.waitForPoweroffFunc(id, client.DefaultTimeoutDuration)
-					if err != nil {
-						return fmt.Errorf("target[%s/%s] : resource(id:%d,name:%s) : %s", target, client.Zone, id, name, err)
-					}
-				}
-			}
-			err := apiWrapper.deleteFunc(id)
-			if err != nil {
-				return fmt.Errorf("target[%s/%s] : resource(id:%d,name:%s) : %s", target, client.Zone, id, name, err)
-			}
-			queue.PushInfo(fmt.Sprintf("target[%s/%s] : resource(id:%d,name:%s) deleted.", target, client.Zone, id, name))
+				queue.PushInfo(fmt.Sprintf("%-26s : resource(id:%d,name:%s) deleted.", fmt.Sprintf("target[%s/%s]", target, client.Zone), id, name))
+				wg.Done()
+			}(resource)
 		}
 
+		wg.Wait()
 		return nil
 	})
-	if err != nil {
-		queue.StopByError(err)
-	} else {
-		queue.PushRequest(fmt.Sprintf("%s:done", target), nil)
-		wg.Done()
-	}
 }
 
 func getClient(o *Option, zone string) *api.Client {

@@ -10,8 +10,8 @@ import (
 func Run(option *Option) error {
 
 	currentOption = option
-	wg = sync.WaitGroup{}
-	wg.Add(19) // all resource
+	resourceWaitGroup = sync.WaitGroup{}
+	resourceWaitGroup.Add(19) // all resource
 
 	// setup jobs environments
 	jobQueue := jobq.NewJobQueue(option.JobQueueOption, routes)
@@ -41,4 +41,4 @@ func Run(option *Option) error {
 }
 
 var currentOption *Option
-var wg sync.WaitGroup
+var resourceWaitGroup sync.WaitGroup

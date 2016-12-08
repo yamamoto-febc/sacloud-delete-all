@@ -24,16 +24,13 @@ var routes map[string]jobq.JobRouterFunc = map[string]jobq.JobRouterFunc{
 		"note",
 		"icon",
 	),
-	"serialize-delete": routing.PathThrough("loadbalancer"),
+	"serialize-delete": routing.PathThrough("appliance"),
 
-	"loadbalancer":      routing.Action("sacloud", FindAndDeleteJob("loadbalancer")),
-	"loadbalancer:done": routing.PathThrough("vpcrouter"),
-
-	"vpcrouter":      routing.Action("sacloud", FindAndDeleteJob("vpcrouter")),
-	"vpcrouter:done": routing.PathThrough("database"),
-
-	"database":      routing.Action("sacloud", FindAndDeleteJob("database")),
-	"database:done": routing.PathThrough("server"),
+	"appliance":         routing.Action("sacloud", FindAndDeleteJobParallel("appliance", "loadbalancer", "vpcrouter", "database")),
+	"appliance:done":    routing.PathThrough("server"),
+	"loadbalancer:done": routing.Goal,
+	"vpcrouter:done":    routing.Goal,
+	"database:done":     routing.Goal,
 
 	"server":      routing.Action("sacloud", FindAndDeleteJob("server")),
 	"server:done": routing.PathThrough("after-server"),
@@ -73,7 +70,7 @@ var routes map[string]jobq.JobRouterFunc = map[string]jobq.JobRouterFunc{
 	"icon:done":          routing.Goal,
 
 	"wait-for-delete": func(queue *jobq.Queue, option *jobq.Option, req jobq.JobRequestAPI) {
-		wg.Wait()
+		resourceWaitGroup.Wait()
 		queue.Stop()
 	},
 }
